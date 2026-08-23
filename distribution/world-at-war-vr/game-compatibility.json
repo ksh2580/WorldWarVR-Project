@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "compatibility_status": "local_test_only",
+  "redistributable": false,
+  "architecture": "x86",
+  "engine_build": "1.7.1263 CL(350073)",
+  "steam_target": {
+    "app_id": "10090",
+    "public_branch_build_id": "252004",
+    "base_depot_id": "10091",
+    "base_manifest_id": "5566849738478017518",
+    "english_depot_id": "10092",
+    "english_manifest_id": "3607600095703252129",
+    "compatibility_claimed": false,
+    "blocker": "No genuine Steam Build 252004 appmanifest, SP executable, or MP executable was available for fingerprinting or headset acceptance."
+  },
+  "tested_target": {
+    "source_provenance": "existing user-owned Plutonium cache",
+    "scope": "exact local bytes only",
+    "executables": {
+      "single_player": {
+        "tested_source_filename": "t4sp.exe",
+        "staged_filename": "CoDWaW.exe",
+        "size": 5550080,
+        "sha256": "f26d45524bfff7e44c8ebab4d758ca524edfb0fb7d52352b6c95e1e908799361",
+        "file_version": "1.7",
+        "pe_machine": "0x014C",
+        "pe_magic": "0x010B",
+        "pe_timestamp": "0x4AEA1F46",
+        "image_base": "0x00400000",
+        "entrypoint_rva": "0x003AF316"
+      },
+      "offline_multiplayer": {
+        "tested_source_filename": "t4mp.exe",
+        "staged_filename": "CoDWaWmp.exe",
+        "size": 5505024,
+        "sha256": "943bb93001ad2ed465b6652c27fb649b5f0c5b24097e18a27a588ac35b3457a0",
+        "file_version": "1.7",
+        "pe_machine": "0x014C",
+        "pe_magic": "0x010B",
+        "pe_timestamp": "0x4AEA1F42",
+        "image_base": "0x00400000",
+        "entrypoint_rva": "0x003A8256"
+      }
+    },
+    "runtime_copy_files": [
+      {
+        "path": "binkw32.dll",
+        "size": 171008,
+        "sha256": "1ba84b170efba8fb99b48e2ac0ded52d14b9f6ce657b65748e9a8385c3ab51bb"
+      },
+      {
+        "path": "localization.txt",
+        "size": 2314,
+        "sha256": "5b3452b534a5bab288377097f28d20c7bc17a121d9486fdd45df82df445d14fc"
+      },
+      {
+        "path": "cod.bmp",
+        "size": 491576,
+        "sha256": "a49a0f67afeda9313d242c5b496fd04d809d9a530d0196e7840b44763cf075d6"
+      },
+      {
+        "path": "codlogo.bmp",
+        "size": 109976,
+        "sha256": "56f57e6af1d4294a6c5c44e3d124f7280c5cc98c5f66eba0d009e43086000133"
+      }
+    ],
+    "junction_backed_validation_files": [
+      {
+        "path": "main/iw_00.iwd",
+        "size": 167212099,
+        "sha256": "b576780026469bd71aefa7c1f2e10244bdaf530912ffe08057e3cf0f5c2d39ed"
+      }
+    ],
+    "single_player_required_files": [
+      {
+        "path": "zone/english/code_post_gfx.ff",
+        "size": 348928,
+        "sha256": "a56ac3366255f942a86077f70da40768f0f91828c53cfe44fe1e9c135cd439d3"
+      },
+      {
+        "path": "zone/english/nazi_zombie_prototype.ff",
+        "size": 47293792,
+        "sha256": "b9cedbab57f9793ca50f119c9a17b10a39a9953c78e5385c0e0d18ac49f4fe84"
+      }
+    ],
+    "der_riese_required_files": [
+      {
+        "path": "zone/english/nazi_zombie_factory.ff",
+        "size": 74017600,
+        "sha256": "7c6286743adbf7431a7945798559be3622adb03c99e36f64fe557f6163afe902"
+      },
+      {
+        "path": "zone/english/nazi_zombie_factory_load.ff",
+        "size": 288,
+        "sha256": "8c1c2ca633dd72ed3a139605375b646ba50d9a94811c408061ba6ce431e62559"
+      },
+      {
+        "path": "zone/english/nazi_zombie_factory_patch.ff",
+        "size": 348512,
+        "sha256": "a97ce02875eb97ed04f1a3df1b40c59065ddd2a567f1cf01c8b4413c6cd5e1f7"
+      },
+      {
+        "path": "zone/english/localized_nazi_zombie_factory.ff",
+        "size": 14357888,
+        "sha256": "7c5b6517785589e0c66a0535cddac5afe4d3093910b23cd0a3a0257f75f37034"
+      },
+      {
+        "path": "main/video/nazi_zombie_factory_load.bik",
+        "size": 1128388,
+        "sha256": "422837b1d59d554e3a34a4362b92e43a471d0df146304c654a13a578341808a6"
+      }
+    ],
+    "offline_multiplayer_required_files": [
+      {
+        "path": "zone/english/code_post_gfx_mp.ff",
+        "size": 448672,
+        "sha256": "d5cb1a61466763181879c96e4c5028a333af3cdb06813ffb97c4382672555186"
+      },
+      {
+        "path": "zone/english/patch_mp.ff",
+        "size": 114400,
+        "sha256": "c282efa039044774567da841eae89142c33e9189ba840639c22077b5b55e0870"
+      },
+      {
+        "path": "zone/english/ui_mp.ff",
+        "size": 647776,
+        "sha256": "6039baa4b631aff24d11f224f95f702e182a98334b8e4c618f452146d95a3642"
+      },
+      {
+        "path": "zone/english/common_mp.ff",
+        "size": 39357152,
+        "sha256": "165609e74216f3a1656b97f49a80b8d9148e518e63a721c1351efaafc0b1940a"
+      },
+      {
+        "path": "zone/english/localized_code_post_gfx_mp.ff",
+        "size": 548128,
+        "sha256": "997a9491439b1e6e70252ae9b664f264d046ab16b3e9fd3b89926a1775ebbbe8"
+      },
+      {
+        "path": "zone/english/localized_common_mp.ff",
+        "size": 496896,
+        "sha256": "26fd3f85e954263831525dde0946a36dfd2ed998dc71f3ffa743884b08155f5f"
+      }
+    ]
+  }
+}

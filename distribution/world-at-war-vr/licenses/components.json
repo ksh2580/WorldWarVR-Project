@@ -1,0 +1,198 @@
+{
+  "schema_version": 1,
+  "product_id": "world-at-war-vr",
+  "release_version": "0.4.0-alpha.1",
+  "publication_status": "blocked",
+  "components": [
+    {
+      "component_id": "worldatwarvr-original",
+      "name": "WorldAtWarVR original implementation",
+      "version": "0.4.0-t4-vr-mp",
+      "revision": null,
+      "origin_url": null,
+      "role": "launcher, injection, T4 profile, gameplay comfort, and integration code",
+      "packaged_paths": [
+        "payload/wawvr/WaWVR-PeZBOT-Import.ps1",
+        "payload/wawvr/WorldAtWarVR.dll",
+        "payload/wawvr/WorldAtWarVR.exe"
+      ],
+      "packaged_sha256": {
+        "payload/wawvr/WaWVR-PeZBOT-Import.ps1": "3fa366ced8d9bab2bace2b740aa18688507b8cb42e60ce1ae6e97c982a40f264",
+        "payload/wawvr/WorldAtWarVR.dll": "c5556d1ce6698f5e4f691d87ea3e3522db680d0aed31770df46b973a136ea180",
+        "payload/wawvr/WorldAtWarVR.exe": "b4d48f84956f1ea9b2672bb0f4612bc3f104067ad0caec19e9583a908ae72e74"
+      },
+      "license_spdx": "LicenseRef-WorldAtWarVR-Proprietary-1.0",
+      "license_file": "licenses/WORLDATWARVR-PROPRIETARY-1.0.txt",
+      "copyright": "Copyright (c) 2026 Ryan Craighead",
+      "official_release_bytes": false,
+      "corresponding_source_url": null,
+      "corresponding_source_sha256": null,
+      "redistribution_status": "authorized_channels_only",
+      "notes": "The launcher, injected DLL, and PeZBOT importer are first-party WorldAtWarVR software governed by the packaged proprietary license; no PeZBOT bytes are delivered. The recorded hashes identify the clean, twice-built, byte-identical internal proprietary candidate."
+    },
+    {
+      "component_id": "openxr-sdk-loader",
+      "name": "Khronos OpenXR SDK loader",
+      "version": "1.1.60",
+      "revision": "64f2b37c8c6da3d83c9b4d11865ba1fb752cb8ec",
+      "origin_url": "https://github.com/KhronosGroup/OpenXR-SDK",
+      "role": "statically linked x86 OpenXR loader",
+      "packaged_paths": [
+        "payload/wawvr/WorldAtWarVR.dll"
+      ],
+      "packaged_sha256": {
+        "payload/wawvr/WorldAtWarVR.dll": "c5556d1ce6698f5e4f691d87ea3e3522db680d0aed31770df46b973a136ea180"
+      },
+      "license_spdx": "Apache-2.0",
+      "license_file": "licenses/OPENXR-SDK-Apache-2.0.txt",
+      "copyright": "Khronos Group and OpenXR SDK contributors",
+      "official_release_bytes": false,
+      "corresponding_source_url": "https://github.com/KhronosGroup/OpenXR-SDK/tree/64f2b37c8c6da3d83c9b4d11865ba1fb752cb8ec",
+      "corresponding_source_sha256": null,
+      "redistribution_status": "allowed_with_notice",
+      "notes": "Built from the pinned source submodule; no standalone OpenXR loader DLL is packaged. The recorded DLL hash identifies the clean, twice-built internal candidate."
+    },
+    {
+      "component_id": "jsoncpp",
+      "name": "JsonCpp",
+      "version": "1.9.6",
+      "revision": "OpenXR-SDK tree ee75252fe4102ad31f0a0aecd9c4cfba6adc2dcf",
+      "origin_url": "https://github.com/open-source-parsers/jsoncpp",
+      "role": "statically linked dependency of the OpenXR loader",
+      "packaged_paths": [
+        "payload/wawvr/WorldAtWarVR.dll"
+      ],
+      "packaged_sha256": {
+        "payload/wawvr/WorldAtWarVR.dll": "c5556d1ce6698f5e4f691d87ea3e3522db680d0aed31770df46b973a136ea180"
+      },
+      "license_spdx": "MIT OR LicenseRef-Public-Domain",
+      "license_file": "licenses/JSONCPP.txt",
+      "copyright": "JsonCpp authors",
+      "official_release_bytes": false,
+      "corresponding_source_url": "https://github.com/KhronosGroup/OpenXR-SDK/tree/64f2b37c8c6da3d83c9b4d11865ba1fb752cb8ec/src/external/jsoncpp",
+      "corresponding_source_sha256": null,
+      "redistribution_status": "allowed_with_notice",
+      "notes": "Compiled into the static OpenXR loader. The recorded DLL hash identifies the clean, twice-built internal candidate."
+    },
+    {
+      "component_id": "msvc-static-runtime",
+      "name": "Microsoft Visual C++ static runtime objects",
+      "version": "14.44.35207",
+      "revision": "MSVC toolset 14.44.35207; compiler 19.44.35216",
+      "origin_url": "https://learn.microsoft.com/en-us/visualstudio/releases/2022/redistribution",
+      "role": "statically linked C/C++ runtime",
+      "packaged_paths": [
+        "payload/wawvr/WorldAtWarVR.dll",
+        "payload/wawvr/WorldAtWarVR.exe"
+      ],
+      "packaged_sha256": {
+        "payload/wawvr/WorldAtWarVR.dll": "c5556d1ce6698f5e4f691d87ea3e3522db680d0aed31770df46b973a136ea180",
+        "payload/wawvr/WorldAtWarVR.exe": "b4d48f84956f1ea9b2672bb0f4612bc3f104067ad0caec19e9583a908ae72e74"
+      },
+      "license_spdx": "LicenseRef-Microsoft-Visual-Studio-2022-Distributable-Code",
+      "license_file": null,
+      "copyright": "Microsoft Corporation",
+      "official_release_bytes": false,
+      "corresponding_source_url": null,
+      "corresponding_source_sha256": null,
+      "redistribution_status": "blocked_pending_valid_qualifying_visual_studio_2022_license_and_rebuild",
+      "notes": "The Release /MT build incorporates Microsoft runtime object code and never ships /MTd debug code. Microsoft permits qualifying Distributable Code subject to a valid Visual Studio product license; the Build Tools license alone is not the redistribution grant for this proprietary application. Before publication, build the final candidate under a valid qualifying Visual Studio 2022 Community, Professional, or Enterprise license and record that toolchain/license basis. The binary hashes identify the clean, twice-built internal candidate."
+    },
+    {
+      "component_id": "windows-sdk-link-results",
+      "name": "Microsoft Windows SDK static and import-library link results",
+      "version": "10.0.26100.0",
+      "revision": "Windows SDK 10.0.26100.0",
+      "origin_url": "https://learn.microsoft.com/en-us/legal/windows-sdk/redist",
+      "role": "linked UCRT static objects and UM import-library results",
+      "packaged_paths": [
+        "payload/wawvr/WorldAtWarVR.dll",
+        "payload/wawvr/WorldAtWarVR.exe"
+      ],
+      "packaged_sha256": {
+        "payload/wawvr/WorldAtWarVR.dll": "c5556d1ce6698f5e4f691d87ea3e3522db680d0aed31770df46b973a136ea180",
+        "payload/wawvr/WorldAtWarVR.exe": "b4d48f84956f1ea9b2672bb0f4612bc3f104067ad0caec19e9583a908ae72e74"
+      },
+      "license_spdx": "LicenseRef-Microsoft-Windows-SDK-Distributable-Code",
+      "license_file": null,
+      "copyright": "Microsoft Corporation",
+      "official_release_bytes": false,
+      "corresponding_source_url": null,
+      "corresponding_source_sha256": null,
+      "redistribution_status": "allowed_with_windows_sdk_license_conditions",
+      "notes": "Release /MT links Windows SDK x86 UCRT static-library code and UM import-library results into the final program; no Microsoft .lib is shipped separately. Redistribution remains subject to the Windows SDK Distributable Code conditions, including significant primary functionality, protective downstream terms, Windows-platform use, no implied Microsoft endorsement, preservation of notices, and the required developer indemnity. The binary hashes identify the clean, twice-built internal candidate."
+    },
+    {
+      "component_id": "t4-rtx-research",
+      "name": "t4-rtx",
+      "version": null,
+      "revision": "ade9b2fe9d4101c093169bcc4fee86e88bef7296",
+      "origin_url": "https://github.com/xoxor4d/t4-rtx",
+      "role": "factual reverse-engineering research only",
+      "packaged_paths": [],
+      "packaged_sha256": {},
+      "license_spdx": "NOASSERTION",
+      "license_file": null,
+      "copyright": "t4-rtx contributors",
+      "official_release_bytes": false,
+      "corresponding_source_url": null,
+      "corresponding_source_sha256": null,
+      "redistribution_status": "excluded_no_delivered_bytes",
+      "notes": "No implementation bytes are copied or delivered."
+    },
+    {
+      "component_id": "pezbotwaw-005p",
+      "name": "PeZBOTWAW 005p",
+      "version": "005p",
+      "revision": null,
+      "origin_url": "https://www.moddb.com/mods/pezbot/downloads/pezbot-005p-for-world-at-war",
+      "role": "optional user-supplied offline multiplayer bots",
+      "packaged_paths": [],
+      "packaged_sha256": {},
+      "license_spdx": "NOASSERTION",
+      "license_file": null,
+      "copyright": "PeZBOT authors",
+      "official_release_bytes": false,
+      "corresponding_source_url": null,
+      "corresponding_source_sha256": null,
+      "redistribution_status": "excluded_user_supplied_only",
+      "notes": "The recorded ModDB page identifies filename PeZBOTWAW_005p.zip, size 1,138,246 bytes, and MD5 4defeab88624baf05d28bbebf6c86c01. Archive SHA-256 b7958b96cbe3a8c316290df7148c63ca601d1de2f96f6166d2c67fe069500fdf is accepted only from the user. Neither the archive nor extracted PeZBOT files are delivered; the packaged importer is first-party code that validates exact size, MD5, and SHA-256."
+    },
+    {
+      "component_id": "call-of-duty-world-at-war",
+      "name": "Call of Duty: World at War",
+      "version": "1.7.1263",
+      "revision": "Steam public build 252004 compatibility unproven",
+      "origin_url": "https://store.steampowered.com/app/10090/",
+      "role": "proprietary external game",
+      "packaged_paths": [],
+      "packaged_sha256": {},
+      "license_spdx": "LicenseRef-Proprietary-Activision",
+      "license_file": null,
+      "copyright": "Activision Publishing, Inc. and respective rights holders",
+      "official_release_bytes": false,
+      "corresponding_source_url": null,
+      "corresponding_source_sha256": null,
+      "redistribution_status": "external_never_packaged",
+      "notes": "Users must provide an authorized compatible copy; no executable, fastfile, IWD, video, map, or other game data is delivered."
+    },
+    {
+      "component_id": "windows-directx-runtime",
+      "name": "Windows, Direct3D, and system runtime libraries",
+      "version": "Windows 10 or newer",
+      "revision": null,
+      "origin_url": "https://learn.microsoft.com/windows/",
+      "role": "system-provided runtime dependencies",
+      "packaged_paths": [],
+      "packaged_sha256": {},
+      "license_spdx": "LicenseRef-Microsoft-Windows",
+      "license_file": null,
+      "copyright": "Microsoft Corporation",
+      "official_release_bytes": false,
+      "corresponding_source_url": null,
+      "corresponding_source_sha256": null,
+      "redistribution_status": "system_provided_never_packaged",
+      "notes": "D3D9, D3D11, DXGI, Win32, and other operating-system DLLs are imported from Windows and are not shipped."
+    }
+  ]
+}

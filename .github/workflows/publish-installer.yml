@@ -1,0 +1,280 @@
+name: Publish installer
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to build and publish (for example 0.4.0-alpha.2)
+        required: true
+        type: string
+      confirm_publish:
+        description: Build, test, and publish this version to WorldWarVR-Releases
+        required: true
+        default: false
+        type: boolean
+
+run-name: Publish World War VR v${{ inputs.version }}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: worldwarvr-release-publish
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and test installer
+    if: >-
+      github.repository == 'RyanCraighead/WorldWarVR' &&
+      github.event.repository.private == true &&
+      github.actor == 'RyanCraighead' &&
+      github.ref == 'refs/heads/main' &&
+      inputs.confirm_publish
+    runs-on: windows-2022
+    timeout-minutes: 60
+    env:
+      RestoreLockedMode: true
+    outputs:
+      version: ${{ steps.validate.outputs.version }}
+      installer_sha256: ${{ steps.package.outputs.installer_sha256 }}
+      installer_size: ${{ steps.package.outputs.installer_size }}
+    steps:
+      - name: Check out the selected source commit
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          submodules: recursive
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9
+        with:
+          dotnet-version: 8.0.423
+
+      - name: Validate manual release request
+        id: validate
+        shell: pwsh
+        env:
+          REQUESTED_VERSION: ${{ inputs.version }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $version = $env:REQUESTED_VERSION.Trim()
+          $pattern = '^(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)(?:-(?:alpha|beta|rc)\.(?:0|[1-9][0-9]*))?$'
+          if ($version.Length -gt 32 -or $version -cnotmatch $pattern) {
+              throw "Invalid release version: $version"
+          }
+          if (-not $version.StartsWith('0.4.', [StringComparison]::Ordinal)) {
+              throw 'Native compatibility metadata is currently on the 0.4.x line; use a 0.4.x release version.'
+          }
+          "version=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Restore NuGet packages
+        shell: pwsh
+        env:
+          NUGET_PACKAGES: ${{ runner.temp }}\nuget-packages
+        run: |
+          $ErrorActionPreference = 'Stop'
+          dotnet restore `
+            .\launcher-ui\WorldAtWarVR.Launcher\WorldAtWarVR.Launcher.csproj `
+            --runtime win-x64 `
+            --locked-mode
+          if ($LASTEXITCODE -ne 0) {
+              throw "Launcher restore failed with exit code $LASTEXITCODE."
+          }
+          dotnet restore `
+            .\launcher-ui\WorldAtWarVR.Launcher\WorldAtWarVR.Launcher.Core.Tests\WorldAtWarVR.Launcher.Core.Tests.csproj `
+            --runtime win-x64 `
+            --locked-mode
+          if ($LASTEXITCODE -ne 0) {
+              throw "Launcher test restore failed with exit code $LASTEXITCODE."
+          }
+
+      - name: Acquire pinned Inno Setup compiler
+        id: inno
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $packagePath = Join-Path $env:RUNNER_TEMP 'Tools.InnoSetup.6.7.3.nupkg'
+          $packageUrl = 'https://api.nuget.org/v3-flatcontainer/tools.innosetup/6.7.3/tools.innosetup.6.7.3.nupkg'
+          $packageHash = 'F780898E402FF80612CC8D9FCB8C6E02932BD1CB4C900FFDAA31F9341CFB49F4'
+          $compilerHash = '0A8757031B33777E4C9CBFFEE40F11A5062B36D25CBE144C1DB73B6102B80AD7'
+          $extractRoot = Join-Path $env:RUNNER_TEMP 'inno-6.7.3'
+          Invoke-WebRequest -Uri $packageUrl -OutFile $packagePath
+          $actualPackageHash = (Get-FileHash -LiteralPath $packagePath -Algorithm SHA256).Hash
+          if (-not $actualPackageHash.Equals($packageHash, [StringComparison]::OrdinalIgnoreCase)) {
+              throw "Pinned Inno Setup package hash mismatch: $actualPackageHash"
+          }
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          [System.IO.Compression.ZipFile]::ExtractToDirectory($packagePath, $extractRoot)
+          $compiler = Join-Path $extractRoot 'tools\ISCC.exe'
+          if (-not (Test-Path -LiteralPath $compiler -PathType Leaf)) {
+              throw "Pinned Inno Setup compiler was not found: $compiler"
+          }
+          $actualCompilerHash = (Get-FileHash -LiteralPath $compiler -Algorithm SHA256).Hash
+          if (-not $actualCompilerHash.Equals($compilerHash, [StringComparison]::OrdinalIgnoreCase)) {
+              throw "Pinned Inno Setup compiler hash mismatch: $actualCompilerHash"
+          }
+          "compiler=$compiler" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Build, test, and package installer
+        id: package
+        shell: pwsh
+        env:
+          NUGET_PACKAGES: ${{ runner.temp }}\nuget-packages
+          RELEASE_VERSION: ${{ steps.validate.outputs.version }}
+          INNO_COMPILER: ${{ steps.inno.outputs.compiler }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $buildRoot = Join-Path $env:RUNNER_TEMP 'worldwarvr-build'
+          $outputRoot = Join-Path $env:RUNNER_TEMP 'worldwarvr-output'
+          $tempRoot = Join-Path $env:RUNNER_TEMP 'worldwarvr-temp'
+          & .\scripts\package-standalone.ps1 `
+            -Configuration Release `
+            -Version $env:RELEASE_VERSION `
+            -InnoCompiler $env:INNO_COMPILER `
+            -BuildRoot $buildRoot `
+            -OutputRoot $outputRoot `
+            -TempRoot $tempRoot
+          $installer = Join-Path $outputRoot 'WorldWarVR-Setup.exe'
+          if (-not (Test-Path -LiteralPath $installer -PathType Leaf)) {
+              throw "Installer build did not produce the expected file: $installer"
+          }
+          $item = Get-Item -LiteralPath $installer
+          $sha256 = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant()
+          $manifest = [ordered]@{
+              version = $env:RELEASE_VERSION
+              source_repository = $env:GITHUB_REPOSITORY
+              source_sha = $env:GITHUB_SHA
+              installer_name = $item.Name
+              installer_size = [long]$item.Length
+              installer_sha256 = $sha256
+          }
+          $manifestPath = Join-Path $outputRoot 'release-manifest.json'
+          $manifest | ConvertTo-Json | Set-Content -LiteralPath $manifestPath -Encoding utf8
+          "installer_sha256=$sha256" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "installer_size=$($item.Length)" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          "## Built World War VR v$($env:RELEASE_VERSION)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          "- Source: ``$env:GITHUB_SHA``" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          "- Installer SHA-256: ``$sha256``" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+
+      - name: Upload verified installer for publishing
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: WorldWarVR-release-${{ steps.validate.outputs.version }}
+          path: |
+            ${{ runner.temp }}\worldwarvr-output\WorldWarVR-Setup.exe
+            ${{ runner.temp }}\worldwarvr-output\release-manifest.json
+          if-no-files-found: error
+          retention-days: 3
+          compression-level: 0
+
+  publish:
+    name: Publish GitHub prerelease
+    needs: build
+    runs-on: windows-2022
+    timeout-minutes: 15
+    environment: release
+    steps:
+      - name: Download verified installer
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: WorldWarVR-release-${{ needs.build.outputs.version }}
+          path: ${{ runner.temp }}\worldwarvr-release
+
+      - name: Verify and publish prerelease
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.RELEASES_REPO_TOKEN }}
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+          EXPECTED_SHA256: ${{ needs.build.outputs.installer_sha256 }}
+          EXPECTED_SIZE: ${{ needs.build.outputs.installer_size }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ([string]::IsNullOrWhiteSpace($env:GH_TOKEN)) {
+              throw 'The release environment secret RELEASES_REPO_TOKEN is not configured.'
+          }
+          $targetRepository = 'RyanCraighead/WorldWarVR-Releases'
+          $target = gh repo view $targetRepository --json nameWithOwner,visibility | ConvertFrom-Json
+          $allowedTargetVisibilities = @('PRIVATE', 'PUBLIC')
+          if ($LASTEXITCODE -ne 0 -or
+              $target.nameWithOwner -cne $targetRepository -or
+              $target.visibility -notin $allowedTargetVisibilities) {
+              throw 'The fixed releases repository is unavailable or has an unexpected identity or visibility.'
+          }
+          $releaseRoot = Join-Path $env:RUNNER_TEMP 'worldwarvr-release'
+          $installer = Join-Path $releaseRoot 'WorldWarVR-Setup.exe'
+          $manifestPath = Join-Path $releaseRoot 'release-manifest.json'
+          if (-not (Test-Path -LiteralPath $installer -PathType Leaf) -or
+              -not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) {
+              throw 'The verified release artifact is incomplete.'
+          }
+          $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+          $item = Get-Item -LiteralPath $installer
+          $sha256 = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($manifest.version -cne $env:RELEASE_VERSION -or
+              $manifest.source_repository -cne 'RyanCraighead/WorldWarVR' -or
+              $manifest.source_sha -cne $env:GITHUB_SHA -or
+              $manifest.installer_name -cne 'WorldWarVR-Setup.exe' -or
+              [long]$manifest.installer_size -ne [long]$item.Length -or
+              [long]$env:EXPECTED_SIZE -ne [long]$item.Length -or
+              $manifest.installer_sha256 -cne $sha256 -or
+              $env:EXPECTED_SHA256 -cne $sha256) {
+              throw 'The downloaded release artifact does not match its trusted build manifest.'
+          }
+          $tag = "v$($env:RELEASE_VERSION)"
+          $title = "World War VR v$($env:RELEASE_VERSION)"
+          gh release view $tag --repo $targetRepository *> $null
+          if ($LASTEXITCODE -eq 0) {
+              throw "Release $tag already exists. Bump the version before publishing another build."
+          }
+          $notesPath = Join-Path $env:RUNNER_TEMP 'release-notes.md'
+          @"
+          World War VR is currently a prerelease. Zombies is the primary supported mode. Multiplayer and Campaign remain experimental, and online multiplayer is unsupported.
+
+          Built from private source commit ``RyanCraighead/WorldWarVR@$($env:GITHUB_SHA)``.
+
+          Installer SHA-256: ``$sha256``
+          "@ | Set-Content -LiteralPath $notesPath -Encoding utf8
+          gh release create $tag `
+            --repo $targetRepository `
+            --target main `
+            --title $title `
+            --notes-file $notesPath `
+            --draft `
+            --prerelease `
+            $installer
+          if ($LASTEXITCODE -ne 0) {
+              throw "Could not create draft release $tag."
+          }
+          $release = gh release view $tag --repo $targetRepository --json isDraft,isPrerelease,assets | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0 -or
+              -not $release.isDraft -or
+              -not $release.isPrerelease -or
+              @($release.assets).Count -ne 1 -or
+              $release.assets[0].name -cne 'WorldWarVR-Setup.exe' -or
+              [long]$release.assets[0].size -ne [long]$item.Length -or
+              [string]$release.assets[0].digest -cne "sha256:$sha256") {
+              throw "Draft release $tag did not match the verified local installer; it was left as a draft."
+          }
+          gh release edit $tag `
+            --repo $targetRepository `
+            --draft=false `
+            --prerelease `
+            --title $title `
+            --notes-file $notesPath
+          if ($LASTEXITCODE -ne 0) {
+              throw "Verified release $tag could not be published and remains a draft."
+          }
+          $published = gh release view $tag --repo $targetRepository --json url,isDraft,isPrerelease,assets | ConvertFrom-Json
+          if ($LASTEXITCODE -ne 0 -or
+              $published.isDraft -or
+              -not $published.isPrerelease -or
+              @($published.assets).Count -ne 1 -or
+              $published.assets[0].name -cne 'WorldWarVR-Setup.exe' -or
+              [long]$published.assets[0].size -ne [long]$item.Length -or
+              [string]$published.assets[0].digest -cne "sha256:$sha256") {
+              throw "Published release $tag failed final verification."
+          }
+          "## Published $title" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          "- Release: $($published.url)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          "- Installer SHA-256: ``$sha256``" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8

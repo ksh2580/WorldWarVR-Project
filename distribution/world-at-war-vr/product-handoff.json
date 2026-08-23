@@ -1,0 +1,301 @@
+{
+  "schema_version": 2,
+  "status": "integration_blocked",
+  "identity": {
+    "product_id": "world-at-war-vr",
+    "display_name": "Call of Duty: World at War VR",
+    "mod_name": "WorldAtWarVR",
+    "proposed_storage_key": "c",
+    "storage_key_registered": false
+  },
+  "machine_readable_inputs": {
+    "runtime_contract": "distribution/world-at-war-vr/runtime-contract.json",
+    "game_compatibility": "distribution/world-at-war-vr/game-compatibility.json",
+    "payload_policy": "distribution/world-at-war-vr/payload-policy.json",
+    "component_inventory": "distribution/world-at-war-vr/licenses/components.json"
+  },
+  "release_candidate": {
+    "semver": "0.4.0-alpha.1",
+    "binary_version": "0.4.0-t4-vr-mp",
+    "release_id": null,
+    "sequence": null,
+    "channel": null,
+    "published_at": null,
+    "minimum_launcher_version": null,
+    "signed": false,
+    "publishable": false,
+    "architecture": "x86",
+    "launcher_host_contract": "win32-x64",
+    "artifact": {
+      "status": "verified_unsigned_internal_candidate",
+      "file_name": "world-at-war-vr-0.4.0-alpha.1-win32-x64.vrmod",
+      "format": "vrmod-zip-v1",
+      "compression_methods": [
+        0
+      ],
+      "size": 1496356,
+      "sha256": "f4ef3552a7e28fa2f27a646b316f742dfff1eec5a83a891461a0b76353085b83",
+      "file_count": 9,
+      "expanded_bytes": 1495100,
+      "inventory_sha256": "3ae1818a800e40c33580ce3b26581b8ba65be6f551a00eede3eaff24502824af"
+    },
+    "payload_root": "payload/wawvr",
+    "payload_files": [
+      "payload/wawvr/WaWVR-PeZBOT-Import.ps1",
+      "payload/wawvr/WorldAtWarVR.dll",
+      "payload/wawvr/WorldAtWarVR.exe"
+    ]
+  },
+  "reproducibility": {
+    "status": "two_clean_builds_byte_identical",
+    "record_scope": "Two isolated clean Release builds, standalone packages, payload audits, inventories, and unsigned .vrmod archives were byte-identical for the proprietary/provenance working-tree snapshot.",
+    "toolchain": {
+      "cmake": "3.31.6-msvc6",
+      "msvc": "19.44.35216.0",
+      "linker": "14.44.35207",
+      "windows_sdk": "10.0.26100.0",
+      "openxr_sdk_revision": "64f2b37c8c6da3d83c9b4d11865ba1fb752cb8ec",
+      "jsoncpp_tree": "ee75252fe4102ad31f0a0aecd9c4cfba6adc2dcf"
+    },
+    "compiled_builds": {
+      "build_a_root": ".review-build-proprietary/vs-release",
+      "build_b_root": ".review-build-proprietary-b/vs-release",
+      "tests_per_build": 22,
+      "tests_passed_per_build": 22,
+      "launcher": {
+        "size": 539136,
+        "sha256_a": "b4d48f84956f1ea9b2672bb0f4612bc3f104067ad0caec19e9583a908ae72e74",
+        "sha256_b": "b4d48f84956f1ea9b2672bb0f4612bc3f104067ad0caec19e9583a908ae72e74",
+        "byte_identical": true
+      },
+      "multiplayer_launcher": {
+        "size": 539136,
+        "sha256_a": "e27f5602213e1114913ff5c5bb29416e6a44283ee36c57aa50f9c6c003c898a5",
+        "sha256_b": "e27f5602213e1114913ff5c5bb29416e6a44283ee36c57aa50f9c6c003c898a5",
+        "byte_identical": true
+      },
+      "command_line_launcher": {
+        "size": 538624,
+        "sha256_a": "225e5aef0615c72f3ee86ea95d2d42a9f3935124e7663d2ff235cea09c52a64a",
+        "sha256_b": "225e5aef0615c72f3ee86ea95d2d42a9f3935124e7663d2ff235cea09c52a64a",
+        "byte_identical": true
+      },
+      "injected_dll": {
+        "size": 902144,
+        "sha256_a": "c5556d1ce6698f5e4f691d87ea3e3522db680d0aed31770df46b973a136ea180",
+        "sha256_b": "c5556d1ce6698f5e4f691d87ea3e3522db680d0aed31770df46b973a136ea180",
+        "byte_identical": true
+      }
+    },
+    "standalone_packages": {
+      "package_a_root": ".review-dist-proprietary/WorldAtWarVR-Proprietary-Audit",
+      "package_b_root": ".review-dist-proprietary-b/WorldAtWarVR-Proprietary-Audit",
+      "file_count": 16,
+      "expanded_bytes": 2618214,
+      "file_tree_hash_algorithm": "SHA-256 of ordinal UTF-8 lines path<TAB>size<TAB>lowercase-sha256<LF>, including PACKAGE-SHA256.txt",
+      "file_tree_sha256_a": "bc8de4a81b3e9d0bdaf3361904dab73da248c86d66d15e0a887457f228890a48",
+      "file_tree_sha256_b": "bc8de4a81b3e9d0bdaf3361904dab73da248c86d66d15e0a887457f228890a48",
+      "manifest_sha256_a": "0411ffe1da2edd6d9ea22688b8d482482742790881589df14400586e57bad191",
+      "manifest_sha256_b": "0411ffe1da2edd6d9ea22688b8d482482742790881589df14400586e57bad191",
+      "byte_identical": true
+    },
+    "vrmod_builds": {
+      "build_a_root": ".review-vrmod-proprietary-a4",
+      "build_b_root": ".review-vrmod-proprietary-b4",
+      "release_root_a": ".review-vrmod-proprietary-a4/release-root",
+      "release_root_b": ".review-vrmod-proprietary-b4/release-root",
+      "artifact_sha256_a": "f4ef3552a7e28fa2f27a646b316f742dfff1eec5a83a891461a0b76353085b83",
+      "artifact_sha256_b": "f4ef3552a7e28fa2f27a646b316f742dfff1eec5a83a891461a0b76353085b83",
+      "inventory_sha256_a": "3ae1818a800e40c33580ce3b26581b8ba65be6f551a00eede3eaff24502824af",
+      "inventory_sha256_b": "3ae1818a800e40c33580ce3b26581b8ba65be6f551a00eede3eaff24502824af",
+      "artifact_byte_identical": true,
+      "inventory_byte_identical": true,
+      "repeat_audit_passed": true,
+      "repeat_archive_verification_passed": true
+    }
+  },
+  "store_target": {
+    "store": "steam",
+    "app_id": "10090",
+    "public_branch_build_id": "252004",
+    "base_depot_id": "10091",
+    "base_manifest_id": "5566849738478017518",
+    "english_depot_id": "10092",
+    "english_manifest_id": "3607600095703252129",
+    "build_compatibility_claimed": false,
+    "reason": "No genuine Steam Build 252004 appmanifest, SP executable, or MP executable was available for fingerprinting or headset acceptance."
+  },
+  "tested_game_target": {
+    "compatibility_scope": "exact_local_bytes_only",
+    "source_provenance": "existing user-owned Plutonium cache",
+    "redistributable": false,
+    "architecture": "x86",
+    "engine_build": "1.7.1263 CL(350073)",
+    "single_player_executable_sha256": "f26d45524bfff7e44c8ebab4d758ca524edfb0fb7d52352b6c95e1e908799361",
+    "offline_multiplayer_executable_sha256": "943bb93001ad2ed465b6652c27fb649b5f0c5b24097e18a27a588ac35b3457a0",
+    "second_critical_file": {
+      "path": "zone/english/code_post_gfx.ff",
+      "size": 348928,
+      "sha256": "a56ac3366255f942a86077f70da40768f0f91828c53cfe44fe1e9c135cd439d3"
+    },
+    "complete_fingerprint_inventory": "distribution/world-at-war-vr/game-compatibility.json"
+  },
+  "runtime_and_launch_policy": {
+    "contract": "distribution/world-at-war-vr/runtime-contract.json",
+    "initial_supported_runtime": "Meta Quest Link OpenXR 32-bit",
+    "initial_launcher_variant": "frontend",
+    "direct_map_and_direct_multiplayer_cli_modes_remain_internal_not_platform_variants": true,
+    "renderer_may_supply_paths_or_arguments": false,
+    "trusted_main_process_must_construct_all_stage_paths": true,
+    "install_update_verify_must_never_launch": true,
+    "start_meta_steam_or_services_implicitly": false
+  },
+  "managed_copy_policy": {
+    "live_source_is_read_only": true,
+    "managed_game_root": "<stage>/g",
+    "overlay_destination": "<stage>/g/wawvr",
+    "runtime_and_home_are_outside_managed_game_root": true,
+    "product_owned_exclusions": [
+      {
+        "path": "wawvr/",
+        "rule": "exclude only when an existing launcher installation receipt proves ownership; otherwise reject"
+      }
+    ],
+    "legacy_branded_files": [
+      {
+        "path": "WorldAtWarVR.exe",
+        "recognized_sha256": "06364d8d4cb43416510e675537ff8cb92fbebfe31966b4fc0889c8523484e1a5"
+      },
+      {
+        "path": "WorldAtWarVR.dll",
+        "recognized_sha256": "2435a4871f2a6dcb0b7a075ffc0b35072e63d41859965b150bc7169cafb0a677"
+      },
+      {
+        "path": "WaWVR-PeZBOT-Import.ps1",
+        "recognized_sha256": "3fa366ced8d9bab2bace2b740aa18688507b8cb42e60ce1ae6e97c982a40f264"
+      }
+    ],
+    "reject_exact_root_names_case_insensitive": [
+      "plutonium.exe",
+      "plutonium-bootstrapper-win32.exe",
+      "dinput8.dll",
+      "d3d9.dll",
+      "dxgi.dll",
+      "winmm.dll",
+      "version.dll",
+      "dsound.dll",
+      "opengl32.dll",
+      "OpenXR_loader.dll",
+      "ReShade.ini",
+      "ReShadePreset.ini"
+    ],
+    "reject_root_extension_case_insensitive": [
+      ".asi"
+    ],
+    "reject_exact_root_prefixes_case_insensitive": [
+      "BepInEx/",
+      "MelonLoader/",
+      "reshade-shaders/"
+    ],
+    "never_exclude_or_replace": [
+      "CoDWaW.exe",
+      "CoDWaWmp.exe",
+      "main/",
+      "zone/"
+    ],
+    "mismatched_file_at_any_product_owned_or_legacy_path_is_fatal": true,
+    "rollback_receipt_and_log_contract": "platform_integration_pending"
+  },
+  "redistribution_boundary": {
+    "game_files_in_artifact": false,
+    "plutonium_files_in_artifact": false,
+    "pezbot_files_in_artifact": false,
+    "pezbot_importer_in_artifact": true,
+    "pezbot_importer_is_first_party": true,
+    "pezbot_policy": "user_supplied_exact_size_md5_sha256_only",
+    "pezbot_archive_size": 1138246,
+    "pezbot_archive_md5": "4defeab88624baf05d28bbebf6c86c01",
+    "pezbot_archive_sha256": "b7958b96cbe3a8c316290df7148c63ca601d1de2f96f6166d2c67fe069500fdf"
+  },
+  "license_policy": {
+    "original_contributions_spdx": "LicenseRef-WorldAtWarVR-Proprietary-1.0",
+    "first_party_injected_dll_code_spdx": "LicenseRef-WorldAtWarVR-Proprietary-1.0",
+    "injected_dll_third_party_spdx": [
+      "Apache-2.0",
+      "MIT OR LicenseRef-Public-Domain",
+      "LicenseRef-Microsoft-Visual-Studio-2022-Distributable-Code",
+      "LicenseRef-Microsoft-Windows-SDK-Distributable-Code"
+    ],
+    "first_party_launcher_and_importer_spdx": "LicenseRef-WorldAtWarVR-Proprietary-1.0",
+    "openxr_sdk_spdx": "Apache-2.0",
+    "jsoncpp_spdx": "MIT OR LicenseRef-Public-Domain",
+    "jsoncpp_tree": "ee75252fe4102ad31f0a0aecd9c4cfba6adc2dcf",
+    "msvc_static_runtime_spdx": "LicenseRef-Microsoft-Visual-Studio-2022-Distributable-Code",
+    "windows_sdk_link_results_spdx": "LicenseRef-Microsoft-Windows-SDK-Distributable-Code",
+    "corresponding_source_status": "not_applicable_to_first_party_proprietary_release",
+    "publication_status": "blocked"
+  },
+  "platform_catalog_and_signing_policy": {
+    "catalog_uuid": null,
+    "entitlement_policy": null,
+    "commerce_policy": null,
+    "release_manifest_exists": false,
+    "release_signature_exists": false,
+    "world_at_war_product_adapter_exists": false,
+    "x86_openxr_preflight_exists": false,
+    "runtime_guard_product_support_exists": false,
+    "temporary_license_classes_supported": false
+  },
+  "headset_acceptance": {
+    "accepted": [
+      "Zombies stereo and 6DOF",
+      "2560x1440 packed source resolution and stable distant HUD",
+      "tracked gun alignment, ADS without blur, reload stability, snap turn, knife comfort, grenades, recenter, pause, death, and respawn"
+    ],
+    "pending": [
+      "strict world-fixed menu pointer click selection",
+      "generated-config stock Launch Multiplayer handoff and offline PeZBOT gameplay",
+      "campaign action-slot 6 rocket targeting from the right controller",
+      "frontend, cinematic, map, SP-to-MP, and shutdown transitions on the replacement build"
+    ]
+  },
+  "source_control": {
+    "status": "reproducibly_built_uncommitted_working_tree",
+    "worktree": ".",
+    "branch": "codex/waw-vr-mvp",
+    "commit": "d70acb49b4b89dca3df0afcde65ffe167940fd58",
+    "working_tree_changes": true,
+    "openxr_checked_out_revision": "64f2b37c8c6da3d83c9b4d11865ba1fb752cb8ec",
+    "openxr_index_revision": "64f2b37c8c6da3d83c9b4d11865ba1fb752cb8ec",
+    "immutable": false
+  },
+  "channel_readiness": {
+    "standalone_nexus_or_github_alpha": {
+      "status": "blocked_pending_release_validation",
+      "blockers": [
+        "confirm sole ownership or authorization for every first-party contribution",
+        "build the final Release /MT candidate under a valid qualifying Visual Studio 2022 license and regenerate all hashes",
+        "verify the claimed English Steam target and perform a final headset install/launch smoke test on the exact packaged bytes",
+        "review, commit, and tag the reproducibly built working-tree snapshot",
+        "replace the unsigned internal audit candidate with an explicitly approved public-alpha artifact"
+      ]
+    },
+    "rcvr_managed_launcher": {
+      "status": "integration_blocked",
+      "blockers": [
+        "all standalone public-alpha blockers",
+        "catalog UUID, entitlement and commerce policy, release metadata, signed manifest, and product adapter do not exist",
+        "launcher and runtime guard do not yet support world-at-war-vr or the required 32-bit Meta OpenXR preflight",
+        "temporary license classes are unsupported because the x86 runtime has no periodic guard invocation"
+      ]
+    }
+  },
+  "publication_blockers": [
+    "confirm sole ownership or authorization for every first-party contribution",
+    "genuine Steam Build 252004 SP, MP, and required-data fingerprints plus final headset compatibility are unproven",
+    "the reproducibly built working-tree snapshot must be reviewed, committed, and tagged before publication",
+    "the final Release /MT candidate must be built under a valid qualifying Visual Studio 2022 Community, Professional, or Enterprise license; Build Tools alone is not the proprietary-application redistribution grant",
+    "the exact public-alpha support claims and remaining headset acceptance scope must be frozen and verified",
+    "artifact is an unsigned internal audit candidate and must not be uploaded or published"
+  ]
+}

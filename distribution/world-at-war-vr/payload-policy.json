@@ -1,0 +1,114 @@
+{
+  "schema_version": 1,
+  "product_id": "world-at-war-vr",
+  "component_inventory_path": "licenses/components.json",
+  "artifact": {
+    "file_name_pattern": "^world-at-war-vr-(?:0|[1-9][0-9]{0,2})\\.(?:0|[1-9][0-9]{0,2})\\.(?:0|[1-9][0-9]{0,2})(?:-(?:alpha|beta|rc)\\.(?:0|[1-9][0-9]{0,3}))?-win32-x64\\.vrmod$",
+    "format": "vrmod-zip-v1",
+    "allowed_compression_methods": [
+      0
+    ],
+    "fixed_zip_timestamp": [
+      2000,
+      1,
+      1,
+      0,
+      0,
+      0
+    ],
+    "require_empty_archive_comment": true,
+    "require_empty_entry_extra": true,
+    "require_empty_entry_comment": true
+  },
+  "limits": {
+    "max_artifact_bytes": 2100000,
+    "max_expanded_bytes": 2000000,
+    "max_file_bytes": 1000000,
+    "max_files": 8
+  },
+  "path_rules": {
+    "max_path_chars": 240,
+    "max_segment_chars": 128,
+    "printable_ascii_only": true,
+    "case_insensitive_unique": true
+  },
+  "required_files": [
+    {
+      "path": "licenses/WORLDATWARVR-PROPRIETARY-1.0.txt",
+      "size": 5683,
+      "sha256": "27b4219c19ff779b9bd8c111668f3f4ae0844d57f59e3b298c370e8ce261ecd3"
+    },
+    {
+      "path": "licenses/JSONCPP.txt",
+      "size": 2769,
+      "sha256": "ecf1a272af5d660ed0054701b5662e6a9f208b56502dc67983fce60a657d58b2"
+    },
+    {
+      "path": "licenses/OPENXR-SDK-Apache-2.0.txt",
+      "size": 11560,
+      "sha256": "3ddf9be5c28fe27dad143a5dc76eea25222ad1dd68934a047064e56ed2fa40c5"
+    },
+    {
+      "path": "licenses/THIRD-PARTY-NOTICES.md",
+      "size": 4403,
+      "sha256": "a97f5c313bb450dc3660a9d2782394b8140b75bf8d704b716841f6e932f7cc18"
+    },
+    {
+      "path": "licenses/components.json",
+      "size": 11532,
+      "sha256": "f5fe420aec5b9ea59fe185c4f63a342a910b6ab6100d24f6db1176508f24ecf1"
+    },
+    {
+      "path": "payload/wawvr/WaWVR-PeZBOT-Import.ps1",
+      "size": 15242,
+      "sha256": "3fa366ced8d9bab2bace2b740aa18688507b8cb42e60ce1ae6e97c982a40f264"
+    },
+    {
+      "path": "payload/wawvr/WorldAtWarVR.dll",
+      "size": 902144,
+      "sha256": "c5556d1ce6698f5e4f691d87ea3e3522db680d0aed31770df46b973a136ea180"
+    },
+    {
+      "path": "payload/wawvr/WorldAtWarVR.exe",
+      "size": 539136,
+      "sha256": "b4d48f84956f1ea9b2672bb0f4612bc3f104067ad0caec19e9583a908ae72e74"
+    }
+  ],
+  "forbidden": {
+    "names": [
+      "CoDWaW.exe",
+      "CoDWaWmp.exe",
+      "t4sp.exe",
+      "t4mp.exe",
+      "binkw32.dll",
+      "plutonium.exe",
+      "plutonium-bootstrapper-win32.exe",
+      "PeZBOTWAW_005p.zip",
+      "mod.ff",
+      "PeZBOTWaW.iwd"
+    ],
+    "extensions": [
+      ".asi",
+      ".bat",
+      ".bik",
+      ".cmd",
+      ".d3dbsp",
+      ".ff",
+      ".iwd",
+      ".log",
+      ".msi",
+      ".pdb"
+    ],
+    "prefixes": [
+      "BepInEx/",
+      "MelonLoader/",
+      "reshade-shaders/"
+    ],
+    "allowed_executable_paths": [
+      "payload/wawvr/WorldAtWarVR.exe"
+    ],
+    "allowed_dll_paths": [
+      "payload/wawvr/WorldAtWarVR.dll"
+    ]
+  }
+}

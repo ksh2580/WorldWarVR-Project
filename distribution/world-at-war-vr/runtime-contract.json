@@ -1,0 +1,276 @@
+{
+  "schema_version": 1,
+  "status": "integration_blocked",
+  "product_id": "world-at-war-vr",
+  "execution_model": "native-x86-injection-openxr",
+  "architecture": {
+    "wrapper": "x86",
+    "game": "x86",
+    "injected_mod": "x86",
+    "launcher_host_contract": "win32-x64"
+  },
+  "versions": {
+    "wrapper": "0.4.0",
+    "injected_mod": "0.4.0-t4-vr-mp",
+    "openxr_loader": "1.1.60",
+    "openxr_sdk_revision": "64f2b37c8c6da3d83c9b4d11865ba1fb752cb8ec"
+  },
+  "openxr_preflight": {
+    "supported_runtime": "Meta Quest Link OpenXR",
+    "registry_key": "HKLM\\SOFTWARE\\Khronos\\OpenXR\\1",
+    "registry_value": "ActiveRuntime",
+    "registry_view": "32-bit",
+    "reg_exe_view_argument": "/reg:32",
+    "required_manifest_basename": "oculus_openxr_32.json",
+    "required_manifest_runtime_name": "Oculus OpenXR",
+    "required_runtime_library_architecture": "x86",
+    "require_valid_runtime_library_authenticode": true,
+    "required_current_session_processes": [
+      {
+        "process_name": "OVRServer_x64",
+        "path_relative_to_oculus_root": "Support/oculus-runtime/OVRServer_x64.exe"
+      },
+      {
+        "process_name": "OculusDash",
+        "path_relative_to_oculus_root": "Support/oculus-dash/dash/bin/OculusDash.exe"
+      }
+    ],
+    "service_must_already_be_running": "OVRService",
+    "start_meta_software_or_services_implicitly": false,
+    "forbidden_environment_overrides": [
+      "XR_RUNTIME_JSON",
+      "XR_API_LAYER_PATH",
+      "XR_ENABLE_API_LAYERS",
+      "XR_DISABLE_API_LAYERS"
+    ],
+    "reject_running_process_names": [
+      "vrserver",
+      "vrmonitor",
+      "vrdashboard",
+      "vrcompositor",
+      "vrwebhelper",
+      "steamvr_room_setup"
+    ],
+    "observed_test_runtime": {
+      "manifest_path": "C:/Program Files/Oculus/Support/oculus-runtime/oculus_openxr_32.json",
+      "runtime_library_basename": "LibOVRRTImpl32_1.dll",
+      "runtime_library_size": 4835064,
+      "runtime_library_sha256": "3f2bad1daf94cddc87a08c221b180c453c0c591e8c805dcbad724ed68f32d9a4",
+      "runtime_library_signature_status": "Valid",
+      "runtime_library_signer": "Meta Platforms, Inc.",
+      "policy_note": "The observed hash records headset-test evidence only; release preflight pins architecture, manifest identity, path, and valid Authenticode rather than one updatable Meta runtime hash."
+    }
+  },
+  "stage_layout": {
+    "stage_root": "<stage>",
+    "managed_game_root": "<stage>/g",
+    "payload_root": "<stage>/g/wawvr",
+    "single_player_runtime": "<stage>/x/waw-1.7.1263",
+    "single_player_home": "<stage>/h/home",
+    "multiplayer_runtime": "<stage>/x/waw-mp-1.7.1263",
+    "multiplayer_home": "<stage>/h/home-mp",
+    "runtime_license_guard": "<stage>/vrmod-license/vr-license-guard.exe",
+    "write_roots": [
+      "<stage>/x",
+      "<stage>/h"
+    ],
+    "read_only_roots": [
+      "<stage>/g"
+    ],
+    "runtime_junctions": [
+      {
+        "destination": "<stage>/x/waw-1.7.1263/main",
+        "source": "<stage>/g/main"
+      },
+      {
+        "destination": "<stage>/x/waw-1.7.1263/zone",
+        "source": "<stage>/g/zone"
+      },
+      {
+        "destination": "<stage>/x/waw-mp-1.7.1263/main",
+        "source": "<stage>/g/main"
+      },
+      {
+        "destination": "<stage>/x/waw-mp-1.7.1263/zone",
+        "source": "<stage>/g/zone"
+      }
+    ],
+    "runtime_file_policy": {
+      "copy_files_json_pointer": "game-compatibility.json#/tested_target/runtime_copy_files",
+      "copy_source_root": "<stage>/g",
+      "copy_destination_roots": [
+        "<stage>/x/waw-1.7.1263",
+        "<stage>/x/waw-mp-1.7.1263"
+      ],
+      "junction_backed_validation_json_pointers": [
+        "game-compatibility.json#/tested_target/junction_backed_validation_files",
+        "game-compatibility.json#/tested_target/single_player_required_files",
+        "game-compatibility.json#/tested_target/der_riese_required_files",
+        "game-compatibility.json#/tested_target/offline_multiplayer_required_files"
+      ],
+      "do_not_copy_junction_backed_files": true
+    },
+    "stage_overlap_is_fatal": true
+  },
+  "fixed_prepare": {
+    "launches_game": false,
+    "entrypoint_relative_to_stage": "g/wawvr/WorldAtWarVR.exe",
+    "working_directory_relative_to_stage": "g/wawvr",
+    "arguments_in_order": [
+      {
+        "literal": "--prepare"
+      },
+      {
+        "literal": "--resolution"
+      },
+      {
+        "literal": "2560x1440"
+      },
+      {
+        "literal": "--game-dir"
+      },
+      {
+        "stage_relative_path": "g"
+      },
+      {
+        "literal": "--source-exe"
+      },
+      {
+        "stage_relative_path": "g/CoDWaW.exe"
+      },
+      {
+        "literal": "--mp-source-exe"
+      },
+      {
+        "stage_relative_path": "g/CoDWaWmp.exe"
+      },
+      {
+        "literal": "--runtime-dir"
+      },
+      {
+        "stage_relative_path": "x/waw-1.7.1263"
+      },
+      {
+        "literal": "--homepath"
+      },
+      {
+        "stage_relative_path": "h/home"
+      },
+      {
+        "literal": "--mod-dll"
+      },
+      {
+        "stage_relative_path": "g/wawvr/WorldAtWarVR.dll"
+      }
+    ],
+    "renderer_may_supply_paths_or_arguments": false,
+    "trusted_main_process_resolves_stage_paths": true,
+    "game_process_creation_is_forbidden": true
+  },
+  "fixed_frontend_launch": {
+    "user_action_required": true,
+    "entrypoint_relative_to_stage": "g/wawvr/WorldAtWarVR.exe",
+    "working_directory_relative_to_stage": "g/wawvr",
+    "arguments_in_order": [
+      {
+        "literal": "--launch"
+      },
+      {
+        "literal": "--menu"
+      },
+      {
+        "literal": "--wait"
+      },
+      {
+        "literal": "--resolution"
+      },
+      {
+        "literal": "2560x1440"
+      },
+      {
+        "literal": "--game-dir"
+      },
+      {
+        "stage_relative_path": "g"
+      },
+      {
+        "literal": "--source-exe"
+      },
+      {
+        "stage_relative_path": "g/CoDWaW.exe"
+      },
+      {
+        "literal": "--mp-source-exe"
+      },
+      {
+        "stage_relative_path": "g/CoDWaWmp.exe"
+      },
+      {
+        "literal": "--runtime-dir"
+      },
+      {
+        "stage_relative_path": "x/waw-1.7.1263"
+      },
+      {
+        "literal": "--homepath"
+      },
+      {
+        "stage_relative_path": "h/home"
+      },
+      {
+        "literal": "--mod-dll"
+      },
+      {
+        "stage_relative_path": "g/wawvr/WorldAtWarVR.dll"
+      }
+    ],
+    "renderer_may_supply_paths_or_arguments": false,
+    "trusted_main_process_resolves_stage_paths": true,
+    "install_update_verify_must_never_launch": true,
+    "steam_client_must_already_be_running": true,
+    "start_steam_implicitly": false,
+    "running_process_names_without_extension": [
+      "CoDWaW",
+      "CoDWaWmp",
+      "WorldAtWarVR"
+    ]
+  },
+  "stock_multiplayer_handoff": {
+    "shim_basename": "CoDWaWmp.exe",
+    "shim_accepts_arguments": false,
+    "required_exact_parent_basename": "CoDWaW.exe",
+    "parent_must_be_sibling_in_single_player_runtime": true,
+    "parent_must_exit_before_multiplayer_launch": true,
+    "config_basename": "WaWVR-Multiplayer-Handoff.v1",
+    "config_written_atomically_during_single_player_prepare": true,
+    "config_final_file_attributes": "normal durable file; no temporary or reparse attribute",
+    "config_fields": [
+      "game_dir",
+      "sp_runtime_dir",
+      "sp_home_dir",
+      "mp_source_exe",
+      "mp_runtime_dir",
+      "mp_home_dir",
+      "source_resolution"
+    ],
+    "paths_require_local_drive_letter_roots": true,
+    "runtime_and_home_are_derived_siblings": true,
+    "fallback_discovery_in_shim": false,
+    "pezbot_archive_discovery_in_shim": false,
+    "pezbot_archive_import_in_shim": false,
+    "shim_uses_prepared_multiplayer_home_only": true,
+    "same_stage_path_anchoring": "trusted_platform_adapter_responsibility",
+    "prepared_config_receipt_integrity": "trusted_platform_adapter_responsibility",
+    "missing_malformed_noncanonical_or_wrong_stage_config_is_fatal": true
+  },
+  "runtime_license": {
+    "guard_is_platform_owned_and_outside_vrmod": true,
+    "guard_architecture": "x64",
+    "guard_stage_path": "<stage>/vrmod-license/vr-license-guard.exe",
+    "product_enum_support": "missing",
+    "launcher_preflight_support": "missing",
+    "in_runtime_periodic_verification": "not_implemented",
+    "temporary_license_classes_supported": false,
+    "publication_policy": "Block publication until world-at-war-vr is added to the guard and launcher maps. Keep temporary licenses disabled unless the x86 runtime gains periodic guard invocation."
+  }
+}
