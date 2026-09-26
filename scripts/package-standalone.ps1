@@ -495,6 +495,13 @@ try {
         if ($relative.StartsWith('licenses\', [StringComparison]::OrdinalIgnoreCase)) {
             continue
         }
+        # The project's own GPL-3.0-only license is intentionally shipped at the
+        # payload root (README: "the World War VR GNU GPL version 3 license").
+        # This scan exists to catch stale boilerplate copied from other projects,
+        # so the root LICENSE is exempt from it.
+        if ($relative -ieq 'LICENSE') {
+            continue
+        }
         if ($file.Name -ne 'LICENSE' -and
             @('.md', '.txt', '.json', '.ps1') -notcontains $file.Extension) {
             continue
