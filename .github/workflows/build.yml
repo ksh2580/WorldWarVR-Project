@@ -1,0 +1,121 @@
+name: Build WorldWarVR
+
+# Builds the standalone World War VR package (native x86 mod DLL + launcher
+# executables + C# launcher UI + Inno Setup installer) on a GitHub-hosted
+# Windows runner and uploads the result as a downloadable artifact.
+#
+# This is a fork-local workflow. The upstream repository's own
+# publish-installer.yml is gated to the author's private repository and cannot
+# run here.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build and package
+    runs-on: windows-2022
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out source with submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.423'
+
+      - name: Report toolchain versions
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio\Installer\vswhere.exe'
+          $vsRoot = & $vswhere -latest -products * `
+            -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+            -property installationPath
+          Write-Host "VS root      : $vsRoot"
+          $cmake = Join-Path $vsRoot 'Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe'
+          Write-Host "Bundled cmake: $(& $cmake --version | Select-Object -First 1)"
+          Write-Host "dotnet       : $(dotnet --version)"
+          Write-Host "SDK 26100    : $(Test-Path 'C:\Program Files (x86)\Windows Kits\10\Include\10.0.26100.0')"
+
+      - name: Acquire pinned Inno Setup compiler
+        id: inno
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $packagePath = Join-Path $env:RUNNER_TEMP 'Tools.InnoSetup.6.7.3.nupkg'
+          $packageUrl = 'https://api.nuget.org/v3-flatcontainer/tools.innosetup/6.7.3/tools.innosetup.6.7.3.nupkg'
+          $packageHash = 'F780898E402FF80612CC8D9FCB8C6E02932BD1CB4C900FFDAA31F9341CFB49F4'
+          $compilerHash = '0A8757031B33777E4C9CBFFEE40F11A5062B36D25CBE144C1DB73B6102B80AD7'
+          $extractRoot = Join-Path $env:RUNNER_TEMP 'inno-6.7.3'
+          Invoke-WebRequest -Uri $packageUrl -OutFile $packagePath
+          $actualPackageHash = (Get-FileHash -LiteralPath $packagePath -Algorithm SHA256).Hash
+          if (-not $actualPackageHash.Equals($packageHash, [StringComparison]::OrdinalIgnoreCase)) {
+              throw "Pinned Inno Setup package hash mismatch: $actualPackageHash"
+          }
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          [System.IO.Compression.ZipFile]::ExtractToDirectory($packagePath, $extractRoot)
+          $compiler = Join-Path $extractRoot 'tools\ISCC.exe'
+          if (-not (Test-Path -LiteralPath $compiler -PathType Leaf)) {
+              throw "Pinned Inno Setup compiler was not found: $compiler"
+          }
+          $actualCompilerHash = (Get-FileHash -LiteralPath $compiler -Algorithm SHA256).Hash
+          if (-not $actualCompilerHash.Equals($compilerHash, [StringComparison]::OrdinalIgnoreCase)) {
+              throw "Pinned Inno Setup compiler hash mismatch: $actualCompilerHash"
+          }
+          "compiler=$compiler" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Build, test, and package
+        id: package
+        shell: pwsh
+        env:
+          INNO_COMPILER: ${{ steps.inno.outputs.compiler }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $buildRoot = Join-Path $env:RUNNER_TEMP 'wawvr-build'
+          $outputRoot = Join-Path $env:RUNNER_TEMP 'wawvr-output'
+          $tempRoot = Join-Path $env:RUNNER_TEMP 'wawvr-temp'
+          & .\scripts\package-standalone.ps1 `
+            -Configuration Release `
+            -Version '0.4.0-alpha.1' `
+            -InnoCompiler $env:INNO_COMPILER `
+            -BuildRoot $buildRoot `
+            -OutputRoot $outputRoot `
+            -TempRoot $tempRoot
+          $installer = Join-Path $outputRoot 'WorldWarVR-Setup.exe'
+          if (-not (Test-Path -LiteralPath $installer -PathType Leaf)) {
+              throw "Installer build did not produce the expected file: $installer"
+          }
+          $sha256 = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash.ToLowerInvariant()
+          Write-Host "Installer SHA-256: $sha256"
+          "installer_sha256=$sha256" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WorldWarVR-package
+          path: |
+            ${{ runner.temp }}\wawvr-output\WorldWarVR\**
+            ${{ runner.temp }}\wawvr-output\WorldWarVR-Setup.exe
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload build trees on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: WorldWarVR-failure-logs
+          path: |
+            ${{ runner.temp }}\wawvr-build\**\*.log
+            ${{ runner.temp }}\wawvr-temp\**
+          if-no-files-found: ignore
+          retention-days: 7
