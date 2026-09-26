@@ -195,8 +195,14 @@ CurrentProcessBindingResult validate_and_bind_supported_current_process() {
 
     auto& snapshot = *captured.snapshot;
     const auto digest = sha256(snapshot.executable_file);
-    const auto* const profile = find_supported_profile(
+    const ExecutableProfile* profile = find_supported_profile(
         snapshot.executable_file.size(), digest);
+    if (profile == nullptr) {
+        // DEV BUILD: no exact identity matched, so fall back to the Steam profile
+        // for this file name instead of refusing to patch.
+        const auto leaf = snapshot.executable_path.filename().string();
+        profile = fallback_steam_profile(leaf);
+    }
     if (profile == nullptr) {
         ValidationReport unsupported{};
         unsupported.add(

@@ -199,6 +199,12 @@ supported_profiles() noexcept;
 [[nodiscard]] const ExecutableProfile* find_supported_profile(
     std::uint64_t file_size, const Sha256Digest& sha256) noexcept;
 
+// DEV BUILD: returns the Steam profile for an executable file name when no exact
+// identity matched, so a structurally compatible build is still patched. The
+// per-hook-site byte sentinels are still validated against the loaded module.
+[[nodiscard]] const ExecutableProfile* fallback_steam_profile(
+    std::string_view executable_leaf_name) noexcept;
+
 [[nodiscard]] const HookSite* find_hook_site(const ExecutableProfile& profile,
                                              HookSiteId id) noexcept;
 

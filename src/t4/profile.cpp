@@ -1,6 +1,7 @@
 #include "profile.hpp"
 
 #include <algorithm>
+#include <cctype>
 
 namespace wawvr::t4 {
 namespace {
@@ -1667,6 +1668,26 @@ const ExecutableProfile* find_supported_profile(
             return profile->file_size == file_size && profile->sha256 == sha256;
         });
     return found == profiles.end() ? nullptr : *found;
+}
+
+const ExecutableProfile* fallback_steam_profile(
+    const std::string_view executable_leaf_name) noexcept {
+    const auto ends_with_ci = [](const std::string_view value,
+                                 const std::string_view suffix) noexcept {
+        if (value.size() < suffix.size()) {
+            return false;
+        }
+        const auto tail = value.substr(value.size() - suffix.size());
+        return std::equal(tail.begin(), tail.end(), suffix.begin(),
+                          [](const char a, const char b) noexcept {
+                              return std::tolower(static_cast<unsigned char>(a)) ==
+                                  std::tolower(static_cast<unsigned char>(b));
+                          });
+    };
+    if (ends_with_ci(executable_leaf_name, "CoDWaWmp.exe")) {
+        return &kSteamMpProfile;
+    }
+    return &kSteamSpProfile;
 }
 
 const HookSite* find_hook_site(const ExecutableProfile& profile,

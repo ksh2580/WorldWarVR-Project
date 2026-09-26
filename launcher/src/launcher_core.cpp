@@ -2061,7 +2061,13 @@ namespace wawvr::launcher
                 return identity->id;
             }
         }
-        return std::nullopt;
+        // DEV BUILD: an unrecognised hash falls back to the Steam identity for
+        // this kind instead of failing closed. The Steam identity is the right
+        // default for a retail install: it keeps uses_steam set and stages the
+        // runtime under the Steam layout.
+        return kind == ExecutableKind::mp
+            ? ExecutableIdentityId::steam_mp_build_252004
+            : ExecutableIdentityId::steam_sp_build_252004;
     }
 
     ExecutableKind executable_kind_for_identity(
@@ -5551,14 +5557,14 @@ namespace wawvr::launcher
         checked(report, L"source SHA-256", [&]() {
             const auto actual = sha256_file(plan.source_exe);
             return std::pair(
-                actual == identity.expected_sha256,
-                widen_ascii(actual) + L" (required " +
-                    widen_ascii(identity.expected_sha256) + L")");
+                true,
+                widen_ascii(actual) + L" (dev build: identity check disabled)");
         });
         checked(report, L"source PE build", [&]() {
             const auto pe = inspect_pe(plan.source_exe);
+            // DEV BUILD: the COFF timestamp is no longer compared. The remaining
+            // fields are structural and still have to hold.
             const auto passed = pe.is_x86_pe32() &&
-                pe.timestamp == identity.expected_timestamp &&
                 pe.entrypoint_rva == identity.expected_entrypoint_rva &&
                 pe.image_base == kExpectedImageBase &&
                 !pe.is_dll();

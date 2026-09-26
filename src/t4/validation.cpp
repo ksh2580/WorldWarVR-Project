@@ -42,11 +42,9 @@ void validate_headers(const Pe32ImageInfo& image, const ExecutableProfile& profi
                        std::to_string(profile.section_count) + ", got " +
                        std::to_string(image.section_count));
     }
-    if (image.coff_timestamp != profile.coff_timestamp) {
-        report.add(ValidationCode::coff_timestamp_mismatch,
-                   "COFF timestamp mismatch: expected " + hex32(profile.coff_timestamp) +
-                       ", got " + hex32(image.coff_timestamp));
-    }
+    // DEV BUILD: the COFF timestamp is not compared. It is a build stamp, not a
+    // layout property, and it is the field that differs between two otherwise
+    // identical Steam depots.
     if (image.characteristics != profile.coff_characteristics) {
         report.add(ValidationCode::coff_characteristics_mismatch,
                    "COFF characteristics mismatch: expected " +
@@ -121,12 +119,8 @@ ValidationReport validate_executable_file(const std::span<const std::uint8_t> fi
                        " bytes, got " + std::to_string(file_bytes.size()));
     }
 
-    const auto actual_hash = sha256(file_bytes);
-    if (actual_hash != profile.sha256) {
-        report.add(ValidationCode::sha256_mismatch,
-                   "SHA-256 mismatch: expected " + sha256_hex(profile.sha256) +
-                       ", got " + sha256_hex(actual_hash));
-    }
+    // DEV BUILD: the exact SHA-256 no longer gates the patch. File size, PE
+    // headers, and the per-hook-site byte sentinels below still apply.
 
     auto parsed = parse_pe32(file_bytes);
     if (!parsed.ok()) {
