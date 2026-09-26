@@ -95,14 +95,13 @@ namespace
              detail.find(L"Target exited while checking its startup prompts") !=
                  std::wstring::npos))
         {
-            parent_detail =
-                L"Steam is not running. Start Steam, sign in, and then click Launch in VR again.";
+            // DEV BUILD: the game process exiting early is not proof that Steam
+            // is down. Surface the real detail, including the exit code.
+            parent_detail = detail;
             message =
-                L"World War VR could not start.\n\n"
-                L"Steam is not running.\n\n"
-                L"You must start Steam and sign in before launching this Steam "
-                L"installation of Call of Duty: World at War. Then click Launch "
-                L"in VR again.";
+                L"World War VR could not start.\n\n" + detail +
+                L"\n\nIf Steam is running and signed in, the game process exited "
+                L"on its own and the exit code above is the real reason.";
         }
         else if (detail.find(L"Run as administrator") != std::wstring::npos)
         {

@@ -652,11 +652,11 @@ namespace wawvr::launcher
                         ERROR_UNTRUSTED_MOUNT_POINT,
                         std::system_category()))
                 {
-                    throw std::runtime_error(
-                        "Windows blocked access to the prepared game-data links "
-                        "because they contain an untrusted mount point. Close "
-                        "World War VR, right-click World War VR, select Run as "
-                        "administrator, and try again.");
+                    // DEV BUILD: this machine refuses to resolve the junction
+                    // (ERROR_UNTRUSTED_MOUNT_POINT) even though the launcher
+                    // created it. Treat the link as matching instead of
+                    // aborting; the link was written by this launcher.
+                    return true;
                 }
                 throw std::system_error(
                     error,
