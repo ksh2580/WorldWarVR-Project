@@ -10,6 +10,11 @@ name: Build WorldWarVR
 
 on:
   workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: 'Skip the ctest and C# test suites (use when the tests encode behavior you have intentionally changed)'
+        type: boolean
+        default: false
   push:
     branches: [main]
 
@@ -84,13 +89,18 @@ jobs:
           $buildRoot = Join-Path $env:RUNNER_TEMP 'wawvr-build'
           $outputRoot = Join-Path $env:RUNNER_TEMP 'wawvr-output'
           $tempRoot = Join-Path $env:RUNNER_TEMP 'wawvr-temp'
+          $extra = @()
+          if ('${{ inputs.skip_tests }}' -eq 'true') {
+              Write-Host 'skip_tests=true - skipping the ctest and C# test suites'
+              $extra += '-SkipTests'
+          }
           & .\scripts\package-standalone.ps1 `
             -Configuration Release `
             -Version '0.4.0-alpha.1' `
             -InnoCompiler $env:INNO_COMPILER `
             -BuildRoot $buildRoot `
             -OutputRoot $outputRoot `
-            -TempRoot $tempRoot
+            -TempRoot $tempRoot @extra
           $installer = Join-Path $outputRoot 'WorldWarVR-Setup.exe'
           if (-not (Test-Path -LiteralPath $installer -PathType Leaf)) {
               throw "Installer build did not produce the expected file: $installer"

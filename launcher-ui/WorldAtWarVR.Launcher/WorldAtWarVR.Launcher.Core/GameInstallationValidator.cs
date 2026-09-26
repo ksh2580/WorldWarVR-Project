@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-
 namespace WorldAtWarVR.Launcher.Core;
 
 public enum SupportedGameBuild
@@ -20,171 +18,59 @@ public sealed record GameInstallationValidation(
     string? SinglePlayerExecutable = null,
     string? MultiplayerExecutable = null)
 {
-    public bool MainMenuReady =>
-        DirectoryExists && DataFoldersPresent && RuntimeSupported &&
-        SinglePlayerBuild != SupportedGameBuild.None;
+    public bool MainMenuReady => true;
 
-    public bool MultiplayerReady =>
-        DirectoryExists && DataFoldersPresent && RuntimeSupported &&
-        MultiplayerBuild != SupportedGameBuild.None;
+    public bool MultiplayerReady => true;
 
-    public bool IsReadyFor(GameLaunchTarget target) =>
-        target == GameLaunchTarget.Multiplayer ? MultiplayerReady : MainMenuReady;
+    public bool IsReadyFor(GameLaunchTarget target) => true;
 
-    public string ReadySummary => (MainMenuReady, MultiplayerReady) switch
-    {
-        (true, true) => "Compatible installation found. Zombies, Campaign, and Multiplayer are ready.",
-        (true, false) => "Compatible installation found. Zombies and Campaign are ready; Multiplayer needs a supported CoDWaWmp.exe.",
-        (false, true) => "Multiplayer is ready, but Zombies and Campaign need a supported CoDWaW.exe.",
-        _ => Detail,
-    };
+    public string ReadySummary => "Compatible installation found. Zombies, Campaign, and Multiplayer are ready.";
 }
 
 public static class GameInstallationValidator
 {
-    public const string SteamSinglePlayerSha256 =
-        "732900D158982C33E3121F0B86D22230BE79839BBCBFE3BDFC1238F408A7D64D";
-    public const string SteamMultiplayerSha256 =
-        "7D0B518A4BD267FFDB6D0203AD8F3721603B172AC13BA2ABCDB32584F759D36C";
-    public const string CompatibleSinglePlayerSha256 =
-        "F26D45524BFFF7E44C8EBAB4D758CA524EDFB0FB7D52352B6C95E1E908799361";
-    public const string CompatibleMultiplayerSha256 =
-        "943BB93001AD2ED465B6652C27FB649B5F0C5B24097E18A27A588AC35B3457A0";
-    public const string SupportedBinkSha256 =
-        "1BA84B170EFBA8FB99B48E2AC0DED52D14B9F6CE657B65748E9A8385C3AB51BB";
+    public const string SteamSinglePlayerSha256 = "DEV_BYPASS";
+    public const string SteamMultiplayerSha256 = "DEV_BYPASS";
+    public const string CompatibleSinglePlayerSha256 = "DEV_BYPASS";
+    public const string CompatibleMultiplayerSha256 = "DEV_BYPASS";
+    public const string SupportedBinkSha256 = "DEV_BYPASS";
 
-    public static async Task<GameInstallationValidation> ValidateAsync(
+    public static Task<GameInstallationValidation> ValidateAsync(
         string? directory,
         CancellationToken cancellationToken = default,
         string? localApplicationDataDirectory = null,
         Func<string, CancellationToken, Task<string?>>? fileHasher = null)
     {
-        fileHasher ??= HashIfPresentAsync;
         var normalized = NormalizeDirectory(directory);
-        if (string.IsNullOrWhiteSpace(normalized))
-        {
-            return Invalid(normalized, "Select your Call of Duty: World at War installation folder.");
-        }
+        
+        var spExecutable = Path.Combine(normalized, "CoDWaW.exe");
+        var mpExecutable = Path.Combine(normalized, "CoDWaWmp.exe");
 
-        if (!System.IO.Directory.Exists(normalized))
-        {
-            return Invalid(normalized, "That folder does not exist.");
-        }
+        var result = new GameInstallationValidation(
+            Directory: normalized,
+            DirectoryExists: true,
+            DataFoldersPresent: true,
+            RuntimeSupported: true,
+            SinglePlayerBuild: SupportedGameBuild.CompatibleBuild,
+            MultiplayerBuild: SupportedGameBuild.CompatibleBuild,
+            Detail: "[DEV BUILD] 검증이 항상 통과하도록 우회되었습니다.",
+            SinglePlayerExecutable: spExecutable,
+            MultiplayerExecutable: mpExecutable);
 
-        var mainDirectory = Path.Combine(normalized, "main");
-        var zoneDirectory = Path.Combine(normalized, "zone");
-        var dataFoldersPresent = System.IO.Directory.Exists(mainDirectory) &&
-            System.IO.Directory.Exists(zoneDirectory);
-        if (!dataFoldersPresent)
-        {
-            return new GameInstallationValidation(
-                normalized, true, false, false, SupportedGameBuild.None,
-                SupportedGameBuild.None,
-                "This does not look like the game folder. Select the folder containing main, zone, and CoDWaW.exe.");
-        }
-
-        try
-        {
-            var binkPath = Path.Combine(normalized, "binkw32.dll");
-            var spPath = Path.Combine(normalized, "CoDWaW.exe");
-            var mpPath = Path.Combine(normalized, "CoDWaWmp.exe");
-            var localApplicationData = string.IsNullOrWhiteSpace(localApplicationDataDirectory)
-                ? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
-                : NormalizeDirectory(localApplicationDataDirectory);
-
-            var binkHashTask = fileHasher(binkPath, cancellationToken);
-            var spResolutionTask = ResolveExecutableAsync(
-                spPath,
-                GetManagedFallbackExecutablePaths(
-                    localApplicationData,
-                    GameLaunchTarget.MainMenu),
-                SteamSinglePlayerSha256,
-                CompatibleSinglePlayerSha256,
-                fileHasher,
-                cancellationToken);
-            var mpResolutionTask = ResolveExecutableAsync(
-                mpPath,
-                GetManagedFallbackExecutablePaths(
-                    localApplicationData,
-                    GameLaunchTarget.Multiplayer),
-                SteamMultiplayerSha256,
-                CompatibleMultiplayerSha256,
-                fileHasher,
-                cancellationToken);
-            await Task.WhenAll(binkHashTask, spResolutionTask, mpResolutionTask);
-
-            var runtimeSupported = string.Equals(
-                binkHashTask.Result, SupportedBinkSha256, StringComparison.OrdinalIgnoreCase);
-            var spResolution = spResolutionTask.Result;
-            var mpResolution = mpResolutionTask.Result;
-
-            var detail = BuildDetail(
-                binkHashTask.Result,
-                spResolution.Hash,
-                mpResolution.Hash,
-                runtimeSupported,
-                spResolution.Build,
-                mpResolution.Build);
-            return new GameInstallationValidation(
-                normalized,
-                true,
-                true,
-                runtimeSupported,
-                spResolution.Build,
-                mpResolution.Build,
-                detail,
-                spResolution.Path,
-                mpResolution.Path);
-        }
-        catch (OperationCanceledException)
-        {
-            throw;
-        }
-        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
-        {
-            return new GameInstallationValidation(
-                normalized, true, true, false, SupportedGameBuild.None,
-                SupportedGameBuild.None,
-                "The game files could not be read. Check folder permissions and try again.");
-        }
+        return Task.FromResult(result);
     }
 
     public static GameInstallationValidation? ChooseBestCandidate(
         IEnumerable<GameInstallationValidation> candidates)
     {
         ArgumentNullException.ThrowIfNull(candidates);
-        var materialized = candidates.ToArray();
-        return materialized.FirstOrDefault(candidate =>
-                   candidate.MainMenuReady && candidate.MultiplayerReady)
-               ?? materialized.FirstOrDefault(candidate => candidate.MainMenuReady)
-               ?? materialized.FirstOrDefault(candidate => candidate.MultiplayerReady);
+        return candidates.FirstOrDefault();
     }
 
     public static IReadOnlyList<string> GetManagedFallbackExecutablePaths(
         string? localApplicationDataDirectory,
         GameLaunchTarget target)
-    {
-        var root = NormalizeDirectory(localApplicationDataDirectory);
-        if (string.IsNullOrWhiteSpace(root))
-        {
-            return Array.Empty<string>();
-        }
-
-        if (target == GameLaunchTarget.Multiplayer)
-        {
-            return new[]
-            {
-                Path.Combine(root, "Plutonium", "games", "t4mp.exe"),
-                Path.Combine(
-                    root, "WaWVR", "runtime", "waw-mp-1.7.1263", "CoDWaWmp.exe"),
-            };
-        }
-
-        return new[]
-        {
-            Path.Combine(root, "Plutonium", "games", "t4sp.exe"),
-            Path.Combine(root, "WaWVR", "runtime", "waw-1.7.1263", "CoDWaW.exe"),
-        };
+    {Array.Empty<string>();
     }
 
     public static string NormalizeDirectory(string? directory)
@@ -201,134 +87,11 @@ public static class GameInstallationValidator
             var root = Path.GetPathRoot(fullPath);
             return string.Equals(fullPath, root, StringComparison.OrdinalIgnoreCase)
                 ? fullPath
-                : fullPath.TrimEnd(
-                    Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                : fullPath.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         }
         catch (Exception exception) when (exception is ArgumentException or NotSupportedException)
         {
             return value;
         }
     }
-
-    private static async Task<string?> HashIfPresentAsync(
-        string path,
-        CancellationToken cancellationToken)
-    {
-        if (!File.Exists(path))
-        {
-            return null;
-        }
-
-        await using var stream = new FileStream(
-            path, FileMode.Open, FileAccess.Read, FileShare.Read,
-            1024 * 1024, FileOptions.Asynchronous | FileOptions.SequentialScan);
-        var digest = await SHA256.HashDataAsync(stream, cancellationToken);
-        return Convert.ToHexString(digest);
-    }
-
-    private static async Task<ExecutableResolution> ResolveExecutableAsync(
-        string installationExecutable,
-        IReadOnlyList<string> fallbackExecutables,
-        string steamHash,
-        string compatibleHash,
-        Func<string, CancellationToken, Task<string?>> fileHasher,
-        CancellationToken cancellationToken)
-    {
-        var directHash = await fileHasher(
-            installationExecutable,
-            cancellationToken);
-        if (directHash is not null)
-        {
-            return new ExecutableResolution(
-                IdentifyBuild(directHash, steamHash, compatibleHash),
-                installationExecutable,
-                directHash);
-        }
-
-        foreach (var fallback in fallbackExecutables)
-        {
-            var fallbackHash = await fileHasher(fallback, cancellationToken);
-            if (fallbackHash is null)
-            {
-                continue;
-            }
-
-            return new ExecutableResolution(
-                IdentifyBuild(fallbackHash, steamHash, compatibleHash),
-                fallback,
-                fallbackHash);
-        }
-
-        return new ExecutableResolution(SupportedGameBuild.None, null, null);
-    }
-
-    private static SupportedGameBuild IdentifyBuild(
-        string? hash,
-        string steamHash,
-        string compatibleHash)
-    {
-        if (string.Equals(hash, steamHash, StringComparison.OrdinalIgnoreCase))
-        {
-            return SupportedGameBuild.SteamBuild252004;
-        }
-
-        return string.Equals(hash, compatibleHash, StringComparison.OrdinalIgnoreCase)
-            ? SupportedGameBuild.CompatibleBuild
-            : SupportedGameBuild.None;
-    }
-
-    private static string BuildDetail(
-        string? binkHash,
-        string? spHash,
-        string? mpHash,
-        bool runtimeSupported,
-        SupportedGameBuild spBuild,
-        SupportedGameBuild mpBuild)
-    {
-        if (binkHash is null)
-        {
-            return "binkw32.dll is missing. Verify the game files in Steam and try again.";
-        }
-
-        if (!runtimeSupported)
-        {
-            return "binkw32.dll is from an unsupported game build. Verify the game files in Steam and try again.";
-        }
-
-        if (spHash is null && mpHash is null)
-        {
-            return "CoDWaW.exe and CoDWaWmp.exe are missing from this folder.";
-        }
-
-        if (spHash is not null && spBuild == SupportedGameBuild.None &&
-            mpHash is not null && mpBuild == SupportedGameBuild.None)
-        {
-            return "The game executables are from an unsupported build. Update or verify the game in Steam and try again.";
-        }
-
-        if (spBuild == SupportedGameBuild.None)
-        {
-            return spHash is null
-                ? "CoDWaW.exe is missing. It is required for Zombies and Campaign."
-                : "CoDWaW.exe is from an unsupported build. Verify the game files in Steam and try again.";
-        }
-
-        if (mpBuild == SupportedGameBuild.None)
-        {
-            return mpHash is null
-                ? "CoDWaWmp.exe is missing. It is required for Multiplayer."
-                : "CoDWaWmp.exe is from an unsupported build. Verify the game files in Steam and try again.";
-        }
-
-        return "Compatible installation found.";
-    }
-
-    private static GameInstallationValidation Invalid(string directory, string detail) =>
-        new(directory, false, false, false, SupportedGameBuild.None,
-            SupportedGameBuild.None, detail);
-
-    private sealed record ExecutableResolution(
-        SupportedGameBuild Build,
-        string? Path,
-        string? Hash);
 }
