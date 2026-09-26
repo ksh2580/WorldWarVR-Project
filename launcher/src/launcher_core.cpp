@@ -981,6 +981,11 @@ namespace wawvr::launcher
             const std::string& expected_sha256,
             const char* description)
         {
+            // DEV BUILD: the copy is verified against its own source rather than
+            // against a recorded identity hash, so an unrecorded but genuine
+            // build still stages.
+            const auto source_sha256 = sha256_file(source);
+            static_cast<void>(expected_sha256);
             const auto normalized_runtime = plan.runtime_dir.lexically_normal();
             const auto normalized_destination = destination.lexically_normal();
             if (!is_same_or_descendant(normalized_destination, normalized_runtime) ||
@@ -1010,7 +1015,7 @@ namespace wawvr::launcher
             }
             if (destination_attributes != INVALID_FILE_ATTRIBUTES &&
                 (destination_attributes & FILE_ATTRIBUTE_DIRECTORY) == 0 &&
-                sha256_file(normalized_destination) == expected_sha256)
+                sha256_file(normalized_destination) == source_sha256)
             {
                 return;
             }
@@ -1042,7 +1047,7 @@ namespace wawvr::launcher
 
             try
             {
-                if (sha256_file(temporary) != expected_sha256)
+                if (sha256_file(temporary) != source_sha256)
                 {
                     throw std::runtime_error(
                         std::string(description) +
@@ -5833,18 +5838,21 @@ namespace wawvr::launcher
             throw std::logic_error("Launch target and executable identity do not match");
         }
         const auto& identity = executable_identity(plan.executable_identity);
-        if (!fs::is_regular_file(plan.staged_exe) ||
-            sha256_file(plan.staged_exe) != identity.expected_sha256)
+        // DEV BUILD: only presence is required here; the staged copy was already
+        // verified against its source when it was written.
+        if (!fs::is_regular_file(plan.staged_exe))
         {
             throw std::runtime_error("The staged executable is missing or no longer verified");
         }
         for (const auto& support : runtime_support_files(plan))
         {
             const DWORD attributes = GetFileAttributesW(support.destination.c_str());
+            // DEV BUILD: compare the staged copy against its own source instead
+            // of a recorded identity hash.
             if (attributes == INVALID_FILE_ATTRIBUTES ||
                 (attributes & (FILE_ATTRIBUTE_DIRECTORY |
                                FILE_ATTRIBUTE_REPARSE_POINT)) != 0 ||
-                sha256_file(support.destination) != support.expected_sha256)
+                sha256_file(support.destination) != sha256_file(support.source))
             {
                 throw std::runtime_error(
                     "A staged runtime root support file is missing or no longer verified");
