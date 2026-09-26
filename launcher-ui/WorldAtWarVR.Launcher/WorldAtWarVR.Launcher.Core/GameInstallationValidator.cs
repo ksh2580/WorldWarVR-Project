@@ -70,7 +70,8 @@ public static class GameInstallationValidator
     public static IReadOnlyList<string> GetManagedFallbackExecutablePaths(
         string? localApplicationDataDirectory,
         GameLaunchTarget target)
-    {Array.Empty<string>();
+    {
+        return Array.Empty<string>();
     }
 
     public static string NormalizeDirectory(string? directory)
