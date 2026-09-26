@@ -89,18 +89,19 @@ jobs:
           $buildRoot = Join-Path $env:RUNNER_TEMP 'wawvr-build'
           $outputRoot = Join-Path $env:RUNNER_TEMP 'wawvr-output'
           $tempRoot = Join-Path $env:RUNNER_TEMP 'wawvr-temp'
-          $extra = @()
+          $packageArgs = @{
+              Configuration = 'Release'
+              Version       = '0.4.0-alpha.1'
+              InnoCompiler  = $env:INNO_COMPILER
+              BuildRoot     = $buildRoot
+              OutputRoot    = $outputRoot
+              TempRoot      = $tempRoot
+          }
           if ('${{ inputs.skip_tests }}' -eq 'true') {
               Write-Host 'skip_tests=true - skipping the ctest and C# test suites'
-              $extra += '-SkipTests'
+              $packageArgs.SkipTests = $true
           }
-          & .\scripts\package-standalone.ps1 `
-            -Configuration Release `
-            -Version '0.4.0-alpha.1' `
-            -InnoCompiler $env:INNO_COMPILER `
-            -BuildRoot $buildRoot `
-            -OutputRoot $outputRoot `
-            -TempRoot $tempRoot @extra
+          & .\scripts\package-standalone.ps1 @packageArgs
           $installer = Join-Path $outputRoot 'WorldWarVR-Setup.exe'
           if (-not (Test-Path -LiteralPath $installer -PathType Leaf)) {
               throw "Installer build did not produce the expected file: $installer"
